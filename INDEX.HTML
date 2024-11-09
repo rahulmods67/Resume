@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lottery Predictor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .logo-container {
+            margin-bottom: 20px;
+        }
+
+        .logo-container img {
+            max-width: 200px;
+            height: auto;
+        }
+
+        .period-container {
+            background-color: #1e1e1e;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .period {
+            font-size: 1.5em;
+            color: #f0e68c;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #1e1e1e;
+            border-radius: 15px;
+            padding: 10px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .prediction-info {
+            display: flex;
+            align-items: center;
+            gap: 60px;
+            flex-direction: row;
+        }
+
+        .predicted-image {
+            max-width: 80px;
+            height: auto;
+            border-radius: 10px;
+        }
+
+        .circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: white;
+            animation: pop 0.3s ease;
+            visibility: hidden;
+        }
+
+        .big {
+            background-color: darkorange;
+        }
+
+        .small {
+            background-color: blue;
+        }
+
+        @keyframes pop {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .refresh-btn, .telegram-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 1.2em;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s, transform 0.3s;
+            width: 100%;
+            max-width: 200px;
+        }
+
+        .refresh-btn:hover, .telegram-btn:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+
+        .footer {
+            margin-top: 20px;
+            font-size: 1em;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="logo-container">
+        <img src="photo/1.jpg" alt="Logo">
+    </div>
+
+    <div class="period-container">
+        <div id="period-number" class="period">Current Period: Loading...</div>
+    </div>
+
+    <div class="container">
+        <div class="prediction-info">
+            <img id="predicted-image" class="predicted-image" src="" alt="Predicted Number Image">
+            <div id="circle" class="circle">?</div>
+        </div>
+    </div>
+
+    <button class="refresh-btn" onclick="fetchCurrentGameIssue()">Refresh</button>
+
+    <div class="footer">TG ID - Rahul_mods67</div>
+    
+    <!-- Telegram Button -->
+    <a href="https://t.me/BitGitMinnerOfficial" target="_blank">
+        <button class="telegram-btn">Join Our Telegram</button>
+    </a>
+
+    <script>
+        const imageUrls = [
+            "https://goagame.com/assets/png/n0-30bd92d1.png",
+            "https://goagame.com/assets/png/n1-dfccbff5.png",
+            "https://goagame.com/assets/png/n2-c2913607.png",
+            "https://goagame.com/assets/png/n3-f92c313f.png",
+            "https://goagame.com/assets/png/n4-cb84933b.png",
+            "https://goagame.com/assets/png/n5-49d0e9c5.png",
+            "https://goagame.com/assets/png/n6-a56e0b9a.png",
+            "https://goagame.com/assets/png/n7-5961a17f.png",
+            "https://goagame.com/assets/png/n8-d4d951a4.png",
+            "https://goagame.com/assets/png/n9-a20f6f42.png"
+        ];
+
+        let currentPeriod = 0;
+        let lastFetchedPeriod = null;
+        let savedPrediction = null;
+
+        const PERIOD_API_URL = 'https://api.bdg88zf.com/api/webapi/GetGameIssue';
+        const periodRequestData = {
+            "typeId": 1,
+            "language": 0,
+            "random": "40079dcba93a48769c6ee9d4d4fae23f",
+            "signature": "D12108C4F57C549D82B23A91E0FA20AE",
+            "timestamp": 1727792520
+        };
+
+        async function fetchCurrentGameIssue() {
+            try {
+                const response = await fetch(PERIOD_API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json;charset=UTF-8',
+                        'Accept': 'application/json, text/plain, */*'
+                    },
+                    body: JSON.stringify(periodRequestData)
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.code === 0) {
+                        currentPeriod = data.data.issueNumber;
+                        document.getElementById('period-number').textContent = `Current Period: ${currentPeriod}`;
+                        if (currentPeriod !== lastFetchedPeriod) {
+                            generateAndDisplayPrediction();
+                        }
+                        lastFetchedPeriod = currentPeriod;
+                    }
+                }
+            } catch (error) {
+                console.error('Fetch error:', error);
+            }
+        }
+
+        function generateAndDisplayPrediction() {
+            if (!savedPrediction || currentPeriod !== lastFetchedPeriod) {
+                const randomNumber = Math.floor(Math.random() * 10);
+                const size = randomNumber >= 5 ? 'Big' : 'Small';
+                savedPrediction = {
+                    number: randomNumber,
+                    size: size,
+                    imageUrl: imageUrls[randomNumber]
+                };
+            }
+            updateUI(savedPrediction);
+        }
+
+        function updateUI(prediction) {
+            const imgElement = document.getElementById('predicted-image');
+            const circleElement = document.getElementById('circle');
+
+            imgElement.src = prediction.imageUrl;
+            circleElement.className = `circle ${prediction.size.toLowerCase()}`;
+            circleElement.textContent = prediction.size === 'Big' ? 'B' : 'S';
+            circleElement.style.visibility = 'visible';
+        }
+
+        fetchCurrentGameIssue();
+    </script>
+</body>
+</html>
